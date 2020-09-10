@@ -35,13 +35,19 @@ namespace ShopCet47.Web.Data.Entities
 
 
 
+
         [Display(Name = "Is Available")]
         public bool IsAvailable { get; set; }
 
 
 
+
         [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = false)]
         public double Stock { get; set; }
+
+
+
+        public User User { get; set; }
 
     }
 }
