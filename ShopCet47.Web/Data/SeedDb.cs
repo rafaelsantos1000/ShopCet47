@@ -12,6 +12,7 @@ namespace ShopCet47.Web.Data
         private readonly DataContext _context;
         private Random _random;
 
+
         public SeedDb(DataContext context)
         {
             _context = context;
@@ -32,6 +33,7 @@ namespace ShopCet47.Web.Data
                 await _context.SaveChangesAsync();
             }
         }
+
 
         private void AddProduct(string name)
         {
