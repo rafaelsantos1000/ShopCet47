@@ -9,6 +9,7 @@ namespace ShopCet47.Web.Data.Repositories
     {
         private readonly DataContext _context;
 
+
         public Repository(DataContext context)
         {
             _context = context;
