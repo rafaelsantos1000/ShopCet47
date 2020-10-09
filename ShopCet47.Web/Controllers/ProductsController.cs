@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopCet47.Web.Data;
 using ShopCet47.Web.Data.Entities;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace ShopCet47.Web.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly IProductRepository _productRepository;
@@ -89,8 +91,7 @@ namespace ShopCet47.Web.Controllers
                 }
 
                 var product = this.ToProduct(view, path);
-                //TODO: Mudar para o user que depois tiver logado
-                product.User = await _userHelper.GetUserByEmailAsync("rafael.santos@cinel.pt");
+                product.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                 await _productRepository.CreateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
@@ -184,8 +185,7 @@ namespace ShopCet47.Web.Controllers
                     }
 
                     var product = this.ToProduct(view, path);
-                    //TODO: Mudar para o user que depois tiver logado
-                    product.User = await _userHelper.GetUserByEmailAsync("rafael.santos@cinel.pt");
+                    product.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
                         await _productRepository.UpdateAsync(product);
                     }
                     catch (DbUpdateConcurrencyException)
@@ -221,6 +221,7 @@ namespace ShopCet47.Web.Controllers
                 return View(product);
             }
 
+
             // POST: Products/Delete/5
             [HttpPost, ActionName("Delete")]
             [ValidateAntiForgeryToken]
@@ -230,6 +231,5 @@ namespace ShopCet47.Web.Controllers
                 await _productRepository.DeleteAsync(product);
                 return RedirectToAction(nameof(Index));
             }
-
         }
     }
