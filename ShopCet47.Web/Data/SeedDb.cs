@@ -27,6 +27,9 @@ namespace ShopCet47.Web.Data
         {
             await _context.Database.EnsureCreatedAsync();
 
+            await _userHelper.CheckRoleAsync("Admin");
+            await _userHelper.CheckRoleAsync("Customer");
+
             var user = await _userHelper.GetUserByEmailAsync("rafael.santos@cinel.pt");
             if (user == null)
             {
@@ -44,6 +47,13 @@ namespace ShopCet47.Web.Data
                     throw new InvalidOperationException("Could not create the user in seeder");
                 }
 
+                await _userHelper.AddUserToRoleAsync(user, "Admin");
+            }
+
+            var isInRole = await _userHelper.IsUserInRoleAsync(user, "Admin");
+            if (!isInRole)
+            {
+                await _userHelper.AddUserToRoleAsync(user, "Admin");
             }
 
             if (!_context.Products.Any())

@@ -133,7 +133,7 @@ namespace Store.Web.Controllers
         }
 
 
-        /*[HttpPost]
+        [HttpPost]
         public async Task<IActionResult> ChangeUser(ChangeUserViewModel model)
         {
             if (this.ModelState.IsValid)
@@ -160,7 +160,7 @@ namespace Store.Web.Controllers
             }
 
             return this.View(model);
-        }*/
+        }
 
 
 
@@ -170,7 +170,7 @@ namespace Store.Web.Controllers
         }
 
 
-        /*[HttpPost]
+        [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (this.ModelState.IsValid)
@@ -196,48 +196,5 @@ namespace Store.Web.Controllers
 
             return this.View(model);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateToken([FromBody] LoginViewModel model)
-        {
-            if (this.ModelState.IsValid)
-            {
-                var user = await this.userHelper.GetUserByEmailAsync(model.Username);
-                if (user != null)
-                {
-                    var result = await this.userHelper.ValidatePasswordAsync(
-                        user,
-                        model.Password);
-
-                    if (result.Succeeded)
-                    {
-                        var claims = new[]
-                        {
-                            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                        };
-
-                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.configuration["Tokens:Key"]));
-                        var credencials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                        var token = new JwtSecurityToken(
-                            this.configuration["Tokens:Issuer"],
-                            this.configuration["Tokens:Audience"],
-                            claims,
-                            expires: DateTime.UtcNow.AddDays(15),
-                            signingCredentials: credencials);
-
-                        var results = new
-                        {
-                            token = new JwtSecurityTokenHandler().WriteToken(token),
-                            expiration = token.ValidTo
-                        };
-
-                        return this.Created(string.Empty, results);
-                    }
-                }
-            }
-
-            return this.BadRequest();
-        }*/
     }
 }

@@ -1,19 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ShopCet47.Web.Data;
 using ShopCet47.Web.Data.Entities;
 using ShopCet47.Web.Data.Repositories;
 using ShopCet47.Web.Helpers;
 using ShopCet47.Web.Models;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ShopCet47.Web.Controllers
 {
-    [Authorize]
+   
     public class ProductsController : Controller
     {
         private readonly IProductRepository _productRepository;
@@ -52,7 +50,7 @@ namespace ShopCet47.Web.Controllers
         }
 
 
-
+        [Authorize(Roles ="Admin")]
         // GET: Products/Create
         public IActionResult Create()
         {
@@ -114,6 +112,7 @@ namespace ShopCet47.Web.Controllers
             };
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -148,22 +147,22 @@ namespace ShopCet47.Web.Controllers
             };
 
         }
-            // POST: Products/Edit/5
-            // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-            // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-            [HttpPost]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Edit(int id, ProductViewModel view)
+        // POST: Products/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ProductViewModel view)
+        {
+            if (id != view.Id)
             {
-                if (id != view.Id)
-                {
-                    return NotFound();
-                }
+                return NotFound();
+            }
 
-                if (ModelState.IsValid)
+            if (ModelState.IsValid)
+            {
+                try
                 {
-                    try
-                    {
                     var path = view.ImageUrl;
 
                     if (view.ImageFile != null && view.ImageFile.Length > 0)
@@ -186,50 +185,51 @@ namespace ShopCet47.Web.Controllers
 
                     var product = this.ToProduct(view, path);
                     product.User = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                        await _productRepository.UpdateAsync(product);
-                    }
-                    catch (DbUpdateConcurrencyException)
+                    await _productRepository.UpdateAsync(product);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await _productRepository.ExistAsync(view.Id))
                     {
-                        if (!await _productRepository.ExistAsync(view.Id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        return NotFound();
                     }
-                    return RedirectToAction(nameof(Index));
+                    else
+                    {
+                        throw;
+                    }
                 }
-                return View(view);
-            }
-
-            // GET: Products/Delete/5
-            public async Task<IActionResult> Delete(int? id)
-            {
-                if (id == null)
-                {
-                    return NotFound();
-                }
-
-                var product = await _productRepository.GetByIdAsync(id.Value);
-                if (product == null)
-                {
-                    return NotFound();
-                }
-
-                return View(product);
-            }
-
-
-            // POST: Products/Delete/5
-            [HttpPost, ActionName("Delete")]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> DeleteConfirmed(int id)
-            {
-                var product = await _productRepository.GetByIdAsync(id);
-                await _productRepository.DeleteAsync(product);
                 return RedirectToAction(nameof(Index));
             }
+            return View(view);
+        }
+
+        [Authorize(Roles = "Admin")]
+        // GET: Products/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(id.Value);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
+
+        // POST: Products/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var product = await _productRepository.GetByIdAsync(id);
+            await _productRepository.DeleteAsync(product);
+            return RedirectToAction(nameof(Index));
         }
     }
+}
