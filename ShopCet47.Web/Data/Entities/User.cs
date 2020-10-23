@@ -10,6 +10,5 @@ namespace ShopCet47.Web.Data.Entities
 
         public string LastName { get; set; }
 
-
     }
 }
